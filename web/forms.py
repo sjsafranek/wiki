@@ -3,6 +3,7 @@
     ~~~~~
 """
 from flask_wtf import Form
+# import FlaskForm as Form
 from wtforms import BooleanField
 from wtforms import TextField
 from wtforms import TextAreaField
@@ -10,9 +11,9 @@ from wtforms import PasswordField
 from wtforms.validators import InputRequired
 from wtforms.validators import ValidationError
 
-from wiki.core import clean_url
-from wiki.web import current_wiki
-from wiki.web import current_users
+from core import clean_url
+from web import current_wiki
+from web import current_users
 
 
 class URLForm(Form):
@@ -55,3 +56,13 @@ class LoginForm(Form):
             return
         if not user.check_password(field.data):
             raise ValidationError('Username and password do not match.')
+
+
+class CreateUserForm(Form):
+    username = TextField('', [InputRequired()])
+    password = PasswordField('', [InputRequired()])
+
+    def validate_name(form, field):
+        user = current_users.get_user(field.data)
+        if user:
+            raise ValidationError('This username already exists.')

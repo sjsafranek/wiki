@@ -124,19 +124,50 @@ def get_default_authentication_method():
     return current_app.config.get('DEFAULT_AUTHENTICATION_METHOD', 'cleartext')
 
 
-def make_salted_hash(password, salt=None):
-    if not salt:
-        salt = os.urandom(64)
-    d = hashlib.sha512()
-    d.update(salt[:32])
-    d.update(password)
-    d.update(salt[32:])
-    return binascii.hexlify(salt) + d.hexdigest()
 
+# TODO
+#  - Move to User Model
+def make_salted_hash(password, salt=None):
+    return setPassword(password, salt)
 
 def check_hashed_password(password, salted_hash):
-    salt = binascii.unhexlify(salted_hash[:128])
-    return make_salted_hash(password, salt) == salted_hash
+    return isPassword(password, salted_hash)
+
+def _salt(algo):
+    import random
+    string1 = str(random.random()).encode('utf-8')
+    string2 = str(random.random()).encode('utf-8')
+    salt = hashlib.new(algo)
+    salt.update(string1)
+    salt.update(string2)
+    return salt.hexdigest()[:5]
+
+def _hash(algo, salt, string_to_encrypt):
+    hsh  = hashlib.new(algo)
+    hsh.update(salt.encode('utf-8'))
+    hsh.update(string_to_encrypt.encode('utf-8'))
+    return hsh.hexdigest()
+
+def setPassword(password, salt):
+    import random
+    algo = "sha256"
+    if not salt:
+        salt = _salt(algo)
+    hsh = _hash(algo, salt, password)
+    password = '%s$%s$%s' % (algo, salt, hsh)
+    return password
+
+def isPassword(password, hashed_password):
+    """
+    Returns a boolean of whether the raw_password was correct. Handles
+    encryption formats behind the scenes.
+    """
+    m = hashlib.sha256()
+    algo, salt, hsh = hashed_password.split('$')
+    check = _hash(algo, salt, password)
+    return hsh == check
+#.end
+
 
 
 def protect(f):

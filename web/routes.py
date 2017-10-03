@@ -13,14 +13,15 @@ from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
 
-from wiki.core import Processor
-from wiki.web.forms import EditorForm
-from wiki.web.forms import LoginForm
-from wiki.web.forms import SearchForm
-from wiki.web.forms import URLForm
-from wiki.web import current_wiki
-from wiki.web import current_users
-from wiki.web.user import protect
+from core import Processor
+from web.forms import EditorForm
+from web.forms import LoginForm
+from web.forms import CreateUserForm
+from web.forms import SearchForm
+from web.forms import URLForm
+from web import current_wiki
+from web import current_users
+from web.user import protect
 
 
 bp = Blueprint('wiki', __name__)
@@ -50,6 +51,7 @@ def display(url):
 
 
 @bp.route('/create/', methods=['GET', 'POST'])
+@login_required
 @protect
 def create():
     form = URLForm()
@@ -60,6 +62,7 @@ def create():
 
 
 @bp.route('/edit/<path:url>/', methods=['GET', 'POST'])
+@login_required
 @protect
 def edit(url):
     page = current_wiki.get(url)
@@ -149,25 +152,27 @@ def user_logout():
     flash('Logout successful.', 'success')
     return redirect(url_for('wiki.index'))
 
+# @bp.route('/user/')
+# def user_index():
+#     pass
 
-@bp.route('/user/')
-def user_index():
-    pass
-
-
-@bp.route('/user/create/')
+@bp.route('/user/create/', methods=['GET', 'POST'])
 def user_create():
-    pass
+    form = CreateUserForm()
+    if form.validate_on_submit():
+        current_users.add_user(form.username.data, form.password.data, authentication_method='hash')
+        # current_users.add_user(form.username.data, form.password.data)
+        flash('User created.', 'success')
+        return redirect(request.args.get("next") or url_for('wiki.user_login'))
+    return render_template('create_user.html', form=form)
 
+# @bp.route('/user/<int:user_id>/')
+# def user_admin(user_id):
+#     pass
 
-@bp.route('/user/<int:user_id>/')
-def user_admin(user_id):
-    pass
-
-
-@bp.route('/user/delete/<int:user_id>/')
-def user_delete(user_id):
-    pass
+# @bp.route('/user/delete/<int:user_id>/')
+# def user_delete(user_id):
+#     pass
 
 
 """
@@ -179,4 +184,3 @@ def user_delete(user_id):
 @bp.errorhandler(404)
 def page_not_found(error):
     return render_template('404.html'), 404
-
