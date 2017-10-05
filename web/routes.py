@@ -195,7 +195,7 @@ def export_content():
 """
 
 @bp.errorhandler(401)
-def page_not_found(error):
+def unauthorized(error):
     return render_template('401.html'), 401
 
 @bp.errorhandler(404)
