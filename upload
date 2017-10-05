@@ -1,0 +1,4 @@
+
+zip -r content.zip content
+rsync -vaz content.zip root@207.154.225.107:/root/wiki/
+ssh root@207.154.225.107 -t "cd wiki; unzip content.zip"

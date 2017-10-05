@@ -8,6 +8,7 @@ from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
+from flask import send_file
 from flask_login import current_user
 from flask_login import login_required
 from flask_login import login_user
@@ -22,6 +23,8 @@ from web.forms import URLForm
 from web import current_wiki
 from web import current_users
 from web.user import protect
+
+from web.utils import zipdir
 
 
 bp = Blueprint('wiki', __name__)
@@ -144,7 +147,7 @@ def user_login():
     return render_template('login.html', form=form)
 
 
-@bp.route('/user/logout/')
+@bp.route('/logout/')
 @login_required
 def user_logout():
     current_user.set('authenticated', False)
@@ -160,8 +163,10 @@ def user_logout():
 def user_create():
     form = CreateUserForm()
     if form.validate_on_submit():
-        current_users.add_user(form.username.data, form.password.data, authentication_method='hash')
-        # current_users.add_user(form.username.data, form.password.data)
+        current_users.add_user(
+            form.username.data,
+            form.password.data,
+            authentication_method='hash')
         flash('User created.', 'success')
         return redirect(request.args.get("next") or url_for('wiki.user_login'))
     return render_template('create_user.html', form=form)
@@ -173,6 +178,16 @@ def user_create():
 # @bp.route('/user/delete/<int:user_id>/')
 # def user_delete(user_id):
 #     pass
+
+@bp.route('/export/')
+@login_required
+@protect
+def export_content():
+    if 'superuser' in current_user.data['roles']:
+        zipArchive = zipdir('content/')
+        return send_file(zipArchive, attachment_filename='content.zip', as_attachment=True)
+    return render_template('401.html'), 401
+
 
 
 """
