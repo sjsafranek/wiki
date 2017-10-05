@@ -54,7 +54,7 @@ def create_app(directory):
 
 
 loginmanager = LoginManager()
-loginmanager.login_view = 'wiki.user_login'
+loginmanager.login_view = 'wiki.login'
 
 @loginmanager.user_loader
 def load_user(name):

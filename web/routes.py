@@ -134,9 +134,8 @@ def search():
                                results=results, search=form.term.data)
     return render_template('search.html', form=form, search=None)
 
-
-@bp.route('/user/login/', methods=['GET', 'POST'])
-def user_login():
+@bp.route('/login/', methods=['GET', 'POST'])
+def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = current_users.get_user(form.name.data)
@@ -149,7 +148,7 @@ def user_login():
 
 @bp.route('/logout/')
 @login_required
-def user_logout():
+def logout():
     current_user.set('authenticated', False)
     logout_user()
     flash('Logout successful.', 'success')
@@ -168,7 +167,7 @@ def user_create():
             form.password.data,
             authentication_method='hash')
         flash('User created.', 'success')
-        return redirect(request.args.get("next") or url_for('wiki.user_login'))
+        return redirect(request.args.get("next") or url_for('wiki.login'))
     return render_template('create_user.html', form=form)
 
 # @bp.route('/user/<int:user_id>/')
@@ -186,15 +185,18 @@ def export_content():
     if 'superuser' in current_user.data['roles']:
         zipArchive = zipdir('content/')
         return send_file(zipArchive, attachment_filename='content.zip', as_attachment=True)
-    return render_template('401.html'), 401
-
-
+    return render_template('error.html', error={
+                'code':401,
+                'message':'Unauthorized'})
 
 """
     Error Handlers
     ~~~~~~~~~~~~~~
 """
 
+@bp.errorhandler(401)
+def page_not_found(error):
+    return render_template('401.html'), 401
 
 @bp.errorhandler(404)
 def page_not_found(error):
