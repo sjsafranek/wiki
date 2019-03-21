@@ -13,15 +13,15 @@ Wiki Editor
 	<div class="tab-pane active" id="editor">
 		<form method="post" class="form">
 			{{ form.hidden_tag() }}
-			{{ input(form.title, placeholder="Title", class="span7", autocomplete="off") }}
+			{{ input(form.title, placeholder="Title", class="span7") }}
 			{{ input(form.body, placeholder="Markdown", class="span7", rows="20") }}
-			{{ input(form.tags, placeholder="Tags (comma separated)", class="span7", autocomplete="off") }}
+			{{ input(form.tags, placeholder="Tags (comma separated)", class="span7") }}
 			<div class="form-actions">
         <div class="pull-left">
           <a class="btn" href="#preview" id="previewbtn">Preview</a>
         </div>
 				<div class="pull-right">
-          <a class="btn" href="{{ url_for('wiki.display', url=page.url) }}">Cancel</a>
+          <a class="btn" href="{{ url_for('display', url=page.url) }}">Cancel</a>
 					<button class="btn btn-success" type="submit">Save</button>
 				</div>
 			</div>
@@ -65,7 +65,7 @@ $('#previewlink').on('click', function() {
   $inputs.prop('disabled', true);
   $pre.removeClass('alert').removeClass('alert-error').html("Loading...");
   $.ajax({
-    url: "{{ url_for('wiki.preview') }}",
+    url: "{{ url_for('preview') }}",
     type: "POST",
     data: { body: bodycontent },
     success: function(msg) {
