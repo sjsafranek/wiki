@@ -4,31 +4,31 @@ import os
 import re
 import markdown
 import json
-# import git
+import argparse
+
 from functools import wraps
+
 from flask import (Flask, render_template, flash, redirect, url_for, request,
                    abort)
-# from flask.ext.wtf import Form
+
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, TextField, TextAreaField, PasswordField)
 from wtforms.validators import (InputRequired, ValidationError)
-# from flask.ext.login import (LoginManager, login_required, current_user,
-#                              login_user, logout_user)
-# from flask.ext.script import Manager
+
 from flask_login import (LoginManager, login_required, current_user,
                              login_user, logout_user)
-from flask_script import Manager
+
 
 
 """
     Application Setup
     ~~~~~~~~~
 """
-
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['CONTENT_DIR'] = 'content'
 app.config['TITLE'] = 'wiki'
+app.config['DEFAULT_AUTHENTICATION_METHOD'] = 'cleartext'
 try:
     app.config.from_pyfile(
         os.path.join(app.config.get('CONTENT_DIR'), 'config.py')
@@ -37,11 +37,10 @@ except IOError:
     print ("Startup Failure: You need to place a "
            "config.py in your content directory.")
 
-manager = Manager(app)
-
 loginmanager = LoginManager()
 loginmanager.init_app(app)
 loginmanager.login_view = 'user_login'
+
 
 
 
@@ -271,7 +270,7 @@ class Wiki(object):
                     if not path_prefix:
                         url = name[:-3]
                     else:
-                        url = os.path.join(path_prefix[0], name[:-3])
+                        url = os.path.join('/'.join(path_prefix), name[:-3])
                     if attr:
                         pages[getattr(page, attr)] = page  # TODO: looks like bug, but doesn't appear to be used
                     else:
@@ -693,6 +692,13 @@ def page_not_found(e):
 
 
 if __name__ == '__main__':
-    # users.add_user('admin', 'dev')
-    manager.run()
-    # app.run()
+    parser = argparse.ArgumentParser(description='FlaskWiki')
+    parser.add_argument('--port', type=int, default=8000, help='Port')
+    parser.add_argument('--dir', type=str, default='content', help='Content directory')
+    args = parser.parse_args()
+
+    users.add_user('admin', 'dev')
+
+    app.run(
+        port = args.port
+    )
