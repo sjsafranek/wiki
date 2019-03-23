@@ -1,7 +1,7 @@
 
 import os
-import re
-import markdown
+# import re
+# import markdown
 import argparse
 
 from functools import wraps

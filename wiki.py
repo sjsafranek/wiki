@@ -1,4 +1,6 @@
 import os
+import re
+import markdown
 
 """
     Wiki classes
