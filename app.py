@@ -48,7 +48,7 @@ __VERSION__ = '0.0.1'
 
 app = Flask(__name__)
 
-# mux = Blueprint('default', __name__)
+mux = Blueprint('default', __name__)
 # app.register_blueprint(mux)
 
 # set default config items
@@ -156,7 +156,6 @@ def protect(f):
     ~~~~~~
 """
 
-# mux = Blueprint('mux', __name__, url_prefix='/wiki')
 # mux = Blueprint('mux', __name__)
 
 @app.route('/')
@@ -224,7 +223,7 @@ def move(url):
     if form.validate_on_submit():
         newurl = form.url.data
         wiki.move(url, newurl)
-        return redirect(url_for('.display', url=newurl))
+        return redirect(url_for('display', url=newurl))
     return render_template('move.html', form=form, page=page)
 
 
@@ -234,7 +233,7 @@ def delete(url):
     page = wiki.get_or_404(url)
     wiki.delete(url)
     flash('Page "%s" was deleted.' % page.title, 'success')
-    return redirect(url_for('home'))
+    return redirect(url_for('app.home'))
 
 
 @app.route('/tags/')
@@ -320,9 +319,10 @@ def page_not_found(e):
 
 
 
-# if __name__ == '__main__':
-#     # app.register_blueprint(mux)
-#     app.run(
-#         host = '0.0.0.0',
-#         port = options.port
-#     )
+if __name__ == '__main__':
+    app.register_blueprint(mux)
+    app.run(
+        host = '0.0.0.0',
+        # port = options.port
+        port = 8000
+    )
