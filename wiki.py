@@ -2,6 +2,9 @@ import os
 import re
 import markdown
 
+from flask import abort
+
+
 """
     Wiki classes
     ~~~~~~~~~~~~

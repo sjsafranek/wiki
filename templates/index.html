@@ -4,7 +4,7 @@
 
 {% block content %}
 {% if pages %}
-	<table class="table">
+	<table class="table table-hover">
 		<thead>
 			<tr>
 				<th>Title</th>
@@ -26,9 +26,9 @@
 {% endblock content %}
 
 {% block sidebar %}
-<ul class="nav nav-tabs nav-stacked">
-	<li><a href="{{ url_for('create') }}">New Page</a></li>
-	<li><a href="{{ url_for('tags') }}">Tag List</a></li>
-	<li><a href="{{ url_for('search') }}">Search</a></li>
-</ul>
+	<ul class="nav nav-tabs nav-stacked">
+		<li><a href="{{ url_for('create') }}">New Page</a></li>
+		<li><a href="{{ url_for('tags') }}">Tag List</a></li>
+		<li><a href="{{ url_for('search') }}">Search</a></li>
+	</ul>
 {% endblock sidebar %}

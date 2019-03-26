@@ -5,18 +5,18 @@
 {% endblock title %}
 
 {% block content %}
-  <div id="confirmDelete" class="modal hide fade" aria-hidden="true">
-    <div class="modal-header">
-      <h3>Are you sure?</h3>
-    </div>
-    <div class="modal-body">
-      <p>Are you sure you want to delete {{ page.title }}?  This cannot be undone.</p>
-    </div>
-    <div class="modal-footer">
-      <a href="#" class="btn" data-dismiss="modal" aria-hidden="true">No</a>
-      <a href="{{ url_for('delete', url=page.url) }}" class="btn btn-danger">Yes, delete.</a>
-    </div>
-  </div>
+	<!-- <div id="confirmDelete" class="modal hide fade" aria-hidden="true">
+		<div class="modal-header">
+			<h3>Are you sure?</h3>
+		</div>
+		<div class="modal-body">
+			<p>Are you sure you want to delete {{ page.title }}?  This cannot be undone.</p>
+		</div>
+		<div class="modal-footer">
+			<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">No</a>
+			<a href="{{ url_for('delete', url=page.url) }}" class="btn btn-danger">Yes, delete.</a>
+		</div>
+	</div> -->
 	{{ page }}
 {% endblock content %}
 
@@ -33,6 +33,37 @@
 <ul class="nav nav-pills nav-stacked">
 	<li><a href="{{ url_for('edit', url=page.url) }}">Edit</a></li>
   <li><a href="{{ url_for('move', url=page.url) }}">Move</a></li>
-  <li><a href="#confirmDelete" data-toggle="modal" class="text-error">Delete</a></li>
+  <li><a id="deletePage" class="text-error">Delete</a></li>
 </ul>
 {% endblock sidebar %}
+
+
+
+
+{% block postscripts -%}
+
+	{{ super() }}
+
+	$('#deletePage').on('click', function(){
+		Swal.fire({
+			title: 'Are you sure?',
+			text: "You won't be able to revert this!",
+			type: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#3085d6',
+			cancelButtonColor: '#d33',
+			confirmButtonText: 'Yes, delete it!'
+		}).then((result) => {
+			if (result.value) {
+				Swal.fire(
+					'Deleted!',
+					'Your file has been deleted.',
+					'success'
+				);
+				console.log("[TODO]: DELETE PAGE");
+				debugger;
+			}
+		})
+	});
+
+{%- endblock postscripts %}

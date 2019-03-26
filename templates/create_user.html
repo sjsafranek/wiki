@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}New User{% endblock title %}
+{% block title %}
+	New User
+{% endblock title %}
 
 {% block content %}
-<form class="form form-inline" method="POST">
-	{{ form.hidden_tag() }}
-	{{ form.name(placeholder='Username') }}
-	{{ form.password(placeholder='Password') }}
-	<input type="submit" class="btn btn-primary" value="Create User">
-</form>
+	<form class="form form-inline" method="POST">
+		{{ form.hidden_tag() }}
+		{{ form.name(placeholder='Username', class="form-control input-sm") }}
+		{{ form.password(placeholder='Password', class="form-control input-sm") }}
+		<input type="submit" class="btn btn-sm btn-primary" value="Create User">
+	</form>
 {% endblock content %}

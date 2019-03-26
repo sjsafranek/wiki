@@ -6,8 +6,9 @@ import argparse
 
 from functools import wraps
 
-from flask import (Flask, render_template, flash, redirect, url_for, request,
-                   abort)
+# from flask import (Flask, render_template, flash, redirect, url_for, request,
+#                    abort)
+from flask import (Flask, render_template, flash, redirect, url_for, request)
 
 from flask import current_app
 
@@ -19,10 +20,11 @@ from flask_login import (LoginManager, login_required, current_user,
                              login_user, logout_user)
 
 
-from flask import Blueprint
+# from flask import Blueprint
 
 
 from wiki import Wiki
+from wiki import Processors
 from users import UserManager
 
 __VERSION__ = '0.0.1'
@@ -48,7 +50,7 @@ __VERSION__ = '0.0.1'
 
 app = Flask(__name__)
 
-mux = Blueprint('default', __name__)
+# mux = Blueprint('default', __name__)
 # app.register_blueprint(mux)
 
 # set default config items
@@ -74,7 +76,7 @@ except IOError:
 wiki = Wiki(app.config.get('CONTENT_DIR'))
 users = UserManager(app.config.get('CONTENT_DIR'))
 
-users.add_user('admin', 'dev', active=True, roles=[], authentication_method=app.config.get('AUTHENTICATION_METHOD'))
+users.add_user('admin', 'dev', authentication_method=app.config.get('AUTHENTICATION_METHOD'))
 
 
 loginmanager = LoginManager()
@@ -126,7 +128,8 @@ class LoginForm(FlaskForm):
         user = users.get_user(form.name.data)
         if not user:
             return
-        if not user.check_password(field.data, current_app.config.get('AUTHENTICATION_METHOD')):
+        # if not user.check_password(field.data, current_app.config.get('AUTHENTICATION_METHOD')):
+        if not user.check_password(field.data):
             raise ValidationError('Username and password do not match.')
 
 class CreateUserForm(FlaskForm):
@@ -205,14 +208,14 @@ def edit(url):
     return render_template('editor.html', form=form, page=page)
 
 
-@app.route('/preview/', methods=['POST'])
-@protect
-def preview():
-    a = request.form
-    data = {}
-    processed = Processors(a['body'])
-    data['html'], data['body'], data['meta'] = processed.out()
-    return data['html']
+# @app.route('/preview/', methods=['POST'])
+# @protect
+# def preview():
+#     a = request.form
+#     data = {}
+#     processed = Processors(a['body'])
+#     data['html'], data['body'], data['meta'] = processed.out()
+#     return data['html']
 
 
 @app.route('/move/<path:url>/', methods=['GET', 'POST'])
@@ -291,7 +294,8 @@ def user_index():
 def user_create():
     form = CreateUserForm()
     if form.validate_on_submit():
-        user = users.add_user(form.name.data, form.password.data)
+        user = users.add_user(form.name.data, form.password.data,
+                                authentication_method=app.config.get('AUTHENTICATION_METHOD'))
         flash('User created.', 'success')
         return redirect(request.args.get("next") or url_for('user_login'))
     return render_template('create_user.html', form=form)
@@ -320,7 +324,7 @@ def page_not_found(e):
 
 
 if __name__ == '__main__':
-    app.register_blueprint(mux)
+    # app.register_blueprint(mux)
     app.run(
         host = '0.0.0.0',
         # port = options.port
