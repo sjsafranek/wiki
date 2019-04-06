@@ -41,7 +41,7 @@ that contains at least the following:
 ## Start
 Afterwards just run the app however you want. I personally recommend something
 like gunicorn:
-	
+
 	gunicorn app:app
 
 You can install `setproctitle` with pip to get meaningful process names.

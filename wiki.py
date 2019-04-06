@@ -1,6 +1,7 @@
 import os
 import re
 import markdown
+from datetime import datetime
 
 from flask import abort
 
@@ -111,6 +112,9 @@ class Page(object):
         if not new:
             self.load()
             self.render()
+        else:
+            self._meta['create_at'] = datetime.now().isoformat()
+            # self._meta['update_at'] = datetime.now().isoformat()
 
     def load(self):
         with open(self.path, 'rU') as f:
@@ -125,6 +129,11 @@ class Page(object):
         if not os.path.exists(folder):
             os.makedirs(folder)
         with open(self.path, 'w') as f:
+            # if 'update_at' in self._meta:
+                # print(self._meta['update_at'])
+                # del self._meta['update_at']
+            self._meta['update_at'] = datetime.now().isoformat()
+            print(self._meta['update_at'])
             for key, value in self._meta.items():
                 line = '%s: %s\n' % (key, value)
                 f.write(line)
@@ -142,7 +151,6 @@ class Page(object):
         item = self._meta[name]
         if len(item) == 1:
             return item[0]
-        print(item)
         return item
 
     def __setitem__(self, name, value):
@@ -217,7 +225,6 @@ class Wiki(object):
         path = self.path(url)
         if not self.exists(url):
             return False
-        print(path)
         os.remove(path)
         return True
 

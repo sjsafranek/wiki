@@ -9,7 +9,7 @@ from functools import wraps
 # from flask import (Flask, render_template, flash, redirect, url_for, request,
 #                    abort)
 from flask import (Flask, render_template, flash, redirect, url_for, request)
-
+from flask import jsonify
 from flask import current_app
 
 from flask_wtf import FlaskForm
@@ -92,6 +92,15 @@ loginmanager.login_view = 'user_login'
     ~~~~~
 """
 
+# https://stackoverflow.com/questions/13585663/flask-wtfform-flash-does-not-display-errors
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ), 'error')
+
 
 class URLForm(FlaskForm):
     url = TextField('', [InputRequired()])
@@ -136,6 +145,10 @@ class CreateUserForm(FlaskForm):
     name = TextField('', [InputRequired()])
     password = PasswordField('', [InputRequired()])
 
+    def validate_name(form, field):
+        user = users.get_user(field.data)
+        if user:
+            raise ValidationError('This username already exists.')
 
 
 @loginmanager.user_loader
@@ -230,13 +243,15 @@ def move(url):
     return render_template('move.html', form=form, page=page)
 
 
-@app.route('/delete/<path:url>/')
+@app.route('/delete/<path:url>/', methods=['GET','DELETE'])
 @protect
 def delete(url):
+    # if 'GET' == request.method:
     page = wiki.get_or_404(url)
     wiki.delete(url)
-    flash('Page "%s" was deleted.' % page.title, 'success')
-    return redirect(url_for('app.home'))
+    return jsonify({"status":"ok"})
+    # flash('Page "%s" was deleted.' % page.title, 'success')
+    # return redirect(url_for('home'))
 
 
 @app.route('/tags/')
@@ -292,12 +307,16 @@ def user_index():
 
 @app.route('/user/create/', methods=['GET', 'POST'])
 def user_create():
+    # TODO
+    #  - show validation error?
     form = CreateUserForm()
     if form.validate_on_submit():
         user = users.add_user(form.name.data, form.password.data,
                                 authentication_method=app.config.get('AUTHENTICATION_METHOD'))
         flash('User created.', 'success')
         return redirect(request.args.get("next") or url_for('user_login'))
+    else:
+        flash_errors(form)
     return render_template('create_user.html', form=form)
 
 
